@@ -64,20 +64,41 @@ for i in {1..6}; do
     }"
 done
 
-# Step 4: Save the full Bearer token as a custom variable in Mosyle
-curl --location 'https://businessapi.mosyle.com/v1/devices' \
---header 'Content-Type: application/json' \
---header "accessToken: $accessToken" \
---header "Authorization: Bearer $full_bearer_token" \
---data "{
-     \"operation\": \"create_custom_device_attributes\",
-     \"os\": \"mac\",
-     \"unique_id\": \"custom_cda\",
-     \"name\": \"Custom Device Attribute\",
-     \"value\": \"$full_bearer_token\",
-     \"devices\": [
-         \"%UDID%\"
-     ]
-}"
+# Step 4: Try updating the Access Token attribute in Mosyle
+response=$(curl --location --silent --write-out "%{http_code}" --output /dev/null 'https://businessapi.mosyle.com/v1/devices' \
+    --header 'Content-Type: application/json' \
+    --header "accessToken: $accessToken" \
+    --header "Authorization: Bearer $bearer_token" \
+    --data "{
+         \"operation\": \"update_custom_device_attributes\",
+         \"os\": \"mac\",
+         \"old_unique_id\": \"access_token\",
+         \"unique_id\": \"access_token\",
+         \"name\": \"Access Token\",
+         \"value\": \"$accessToken\"
+    }")
+
+# Check if the response contains CDA_NOT_FOUND
+if [[ "$response" -ne 200 ]]; then
+    echo "Attribute not found, creating it instead..."
+
+    # Create the Access Token attribute in Mosyle
+    curl --location 'https://businessapi.mosyle.com/v1/devices' \
+    --header 'Content-Type: application/json' \
+    --header "accessToken: $accessToken" \
+    --header "Authorization: Bearer $bearer_token" \
+    --data "{
+         \"operation\": \"create_custom_device_attributes\",
+         \"os\": \"mac\",
+         \"unique_id\": \"access_token\",
+         \"name\": \"Access Token\",
+         \"value\": \"$accessToken\",
+         \"devices\": [
+             \"%UDID%\"
+         ]
+    }"
+else
+    echo "Access Token attribute updated successfully!"
+fi
 
 # End of script
