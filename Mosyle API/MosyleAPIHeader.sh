@@ -13,4 +13,11 @@ bearer_token="%custom_bearer_token_1%\
 %custom_bearer_token_5%\
 %custom_bearer_token_6%"
 
+# ===================================================================================
+# Add to the curl command 
+# ===================================================================================
+
+--header "accessToken: $accessToken" \
+--header "Authorization: Bearer $bearer_token" \
+
 # End of script
