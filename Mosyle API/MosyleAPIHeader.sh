@@ -5,7 +5,7 @@
 # ===================================================================================
 
 # Define the Access Token for authentication with Mosyle API
-accessToken="<ACCESS TOKEN>"
+accessToken="%accessToken%"
 bearer_token="%custom_bearer_token_1%\
 %custom_bearer_token_2%\
 %custom_bearer_token_3%\
