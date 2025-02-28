@@ -19,5 +19,3 @@ bearer_token="%custom_bearer_token_1%\
 
 --header "accessToken: $accessToken" \
 --header "Authorization: Bearer $bearer_token" \
-
-# End of script
