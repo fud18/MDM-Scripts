@@ -131,13 +131,22 @@
 #
 ################################################################################################
 
+# ===================================================================================
+# Homebrew Setup Script
+# This script automates the installation and validation of Homebrew on macOS.
+# - Determines the correct Homebrew installation path based on the CPU architecture.
+# - Installs Homebrew if missing, or updates it if already installed.
+# - Runs `brew doctor` to verify the installation status.
+# - Ensures Homebrew is properly set up for the system.
+# ===================================================================================
+
 # Load Zsh-specific functions
 autoload is-at-least
 fpath+=("/usr/share/zsh/functions")
 autoload -Uz is-at-least
 
 # Script version
-VERSION="2.0"
+VERSION="2.1"
 
 ###################################### VARIABLES #######################################
 
@@ -185,13 +194,12 @@ check_brew_install_status() {
     if [[ -x "$BREW_PATH" ]]; then
         logging "info" "Homebrew already installed at $BREW_PATH..."
         
-        logging "info" "Updating homebrew ..."
+        logging "info" "Updating Homebrew..."
         /usr/bin/su - "$current_user" -c "zsh -c 'export PATH=$BREW_PREFIX/bin:\$PATH; $BREW_PATH update --force'" | tee -a "${LOG_PATH}"
 
         logging "info" "Running brew doctor..."
         BREW_STATUS=$(/usr/bin/su - "$current_user" -c "zsh -c 'export PATH=$BREW_PREFIX/bin:\$PATH; $BREW_PATH doctor'" 2>&1)
 
-        echo "$BREW_STATUS"
         logging "info" "$BREW_STATUS"
 
         if [[ "$BREW_STATUS" == *"Your system is ready to brew."* ]]; then
@@ -209,11 +217,25 @@ check_brew_install_status() {
             --url "https://github.com/Homebrew/brew/tarball/master" |
             /usr/bin/tar xz --strip 1 -C "$BREW_PREFIX/Homebrew" | /usr/bin/tee -a "${LOG_PATH}"
 
-        # Validate install
-        if [[ -f "$BREW_PREFIX/Homebrew/bin/brew" ]]; then
-            logging "info" "Homebrew successfully installed at $BREW_PREFIX/Homebrew/bin/brew"
-            logging "info" "Creating the brew environment..."
-            create_brew_environment "$BREW_PREFIX" "$current_user"
+        # Validate installation
+        if [[ -x "$BREW_PATH" ]]; then
+            logging "info" "Homebrew installed successfully at $BREW_PATH."
+            
+            logging "info" "Updating Homebrew..."
+            /usr/bin/su - "$current_user" -c "zsh -c 'export PATH=$BREW_PREFIX/bin:\$PATH; $BREW_PATH update --force'" | tee -a "${LOG_PATH}"
+
+            logging "info" "Running brew doctor..."
+            BREW_STATUS=$(/usr/bin/su - "$current_user" -c "zsh -c 'export PATH=$BREW_PREFIX/bin:\$PATH; $BREW_PATH doctor'" 2>&1)
+
+            logging "info" "$BREW_STATUS"
+
+            if [[ "$BREW_STATUS" == *"Your system is ready to brew."* ]]; then
+                logging "info" "Homebrew installation verified."
+                exit 0
+            else
+                logging "error" "Homebrew installation failed. Check $LOG_PATH for details."
+                exit 1
+            fi
         else
             logging "error" "Homebrew installation failed. Check $LOG_PATH for details."
             exit 1
