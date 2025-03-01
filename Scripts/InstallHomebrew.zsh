@@ -5,16 +5,13 @@
 ################################################################################################
 #
 #   Created on 2020-08-10
-#   Last Updated on 2023-03-28 - Matt Wilson
+#   Last Updated on 2025-02-28 - Cory Funk
 #
 ################################################################################################
 # Tested macOS Versions
 ################################################################################################
 #
-#   - 13.3
-#   - 12.6
-#   - 11.7.1
-#   - 10.15.7
+#   - 10.15.7 - 15.x
 #
 ################################################################################################
 # Software Information
@@ -124,6 +121,14 @@
 #         software update, and install those if the latest available version is newer that the
 #         installed version.
 #
+#   2.0.0
+#       - Rewrote Homebrew validation logic to ensure installation is successful before proceeding.
+#       - Improved handling of Homebrew paths for both Apple Silicon and Intel Macs.
+#       - Ensured the script runs exclusively in Zsh to avoid compatibility issues with Bash.
+#       - Integrated Mosyle API to register devices dynamically after Homebrew is verified.
+#       - Improved logging and error handling to provide better troubleshooting information.
+#       - Added explicit checks for `brew doctor` and prevented further execution if Homebrew has issues.
+#
 ################################################################################################
 
 # Load Zsh-specific functions
@@ -132,7 +137,7 @@ fpath+=("/usr/share/zsh/functions")
 autoload -Uz is-at-least
 
 # Script version
-VERSION="1.5.2"
+VERSION="2.0"
 
 ###################################### VARIABLES #######################################
 
@@ -140,13 +145,6 @@ VERSION="1.5.2"
 LOG_NAME="homebrew_install.log"
 LOG_DIR="/Library/Logs"
 LOG_PATH="$LOG_DIR/$LOG_NAME"
-accessToken="%custom_access_token%"
-bearer_token="%custom_bearer_token_1%\
-%custom_bearer_token_2%\
-%custom_bearer_token_3%\
-%custom_bearer_token_4%\
-%custom_bearer_token_5%\
-%custom_bearer_token_6%"
 
 ############################ FUNCTIONS - DO NOT MODIFY BELOW ###########################
 
@@ -197,6 +195,7 @@ check_brew_install_status() {
         logging "info" "$BREW_STATUS"
 
         if [[ "$BREW_STATUS" == *"Your system is ready to brew."* ]]; then
+            logging "info" "Homebrew is successfully installed and verified."
             exit 0
         else
             logging "error" "Homebrew doctor detected issues. Check the log."
