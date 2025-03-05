@@ -204,7 +204,6 @@ check_brew_install_status() {
 
         if [[ "$BREW_STATUS" == *"Your system is ready to brew."* ]]; then
             logging "info" "Homebrew is successfully installed and verified."
-            exit 0
         else
             logging "error" "Homebrew doctor detected issues. Check the log."
             exit 1
@@ -231,7 +230,6 @@ check_brew_install_status() {
 
             if [[ "$BREW_STATUS" == *"Your system is ready to brew."* ]]; then
                 logging "info" "Homebrew installation verified."
-                exit 0
             else
                 logging "error" "Homebrew installation failed. Check $LOG_PATH for details."
                 exit 1
